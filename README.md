@@ -11,66 +11,47 @@ Built a 3-layer data warehouse (raw → clean → reporting) to process 10,000+ 
 - **ETL**: Python (pandas, snowflake-connector)
 - **Transformations**: SQL (CTEs, window functions, CASE statements)
 - **Visualization**: Power BI
+  
 ## 🏗️ Architecture
-┌─────────────────────────────────────────────────────────────────┐
-│ DATA SOURCE │
-│ Sample - Superstore.csv │
-│ (~10,000 rows) │
-└─────────────────────────────┬───────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ PYTHON ETL SCRIPT │
-│ load_to_snowflake_py.py │
-│ │
-│ • pandas reads CSV │
-│ • Column names cleaned (spaces → underscores) │
-│ • Batch insert into Snowflake (500 rows/batch) │
-└─────────────────────────────┬───────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ SNOWFLAKE │
-│ │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ RAW LAYER │ │
-│ │ superstore_db.raw.orders_raw │ │
-│ │ All columns as VARCHAR │ │
-│ │ (no transformations, exactly as CSV) │ │
-│ └─────────────────────────────┬───────────────────────────┘ │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ CLEAN LAYER │ │
-│ │ superstore_db.clean.orders_clean │ │
-│ │ │ │
-│ │ • TO_DATE() for dates │ │
-│ │ • DATEDIFF() for shipping duration │ │
-│ │ • CAST() for numbers (DECIMAL, INT) │ │
-│ │ • CASE() for profit_status (Profitable/Loss/Break-even)│ │
-│ └─────────────────────────────┬───────────────────────────┘ │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ REPORTING LAYER │ │
-│ │ │ │
-│ │ • regional_summary (region + category aggregates) │ │
-│ │ • monthly_trend (time series + cumulative window fn) │ │
-│ │ • customer_analysis (RANK, ROW_NUMBER per customer) │ │
-│ └─────────────────────────────┬───────────────────────────┘ │
-│ │ │
-└────────────────────────────────┼─────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ POWER BI DASHBOARD │
-│ │
-│ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ │
-│ │ Overview │ │ Regional │ │ Product │ │ Customer │ │
-│ │ Page 1 │ │ Page 2 │ │ Page 3 │ │ Page 4 │ │
-│ └──────────┘ └──────────┘ └──────────┘ └──────────┘ │
-└─────────────────────────────────────────────────────────────────┘
 
+## 🏗️ Architecture
+
+### Data Flow
+
+**Step 1: Data Source**
+- Sample - Superstore.csv
+- ~10,000 rows, 21 columns
+
+**Step 2: Python ETL Script**
+- File: load_to_snowflake_py.py
+- pandas reads CSV
+- Column names cleaned (spaces → underscores)
+- Batch insert into Snowflake (500 rows/batch)
+
+**Step 3: Snowflake — RAW Layer**
+- Table: superstore_db.raw.orders_raw
+- All columns as VARCHAR
+- No transformations, exactly as CSV
+
+**Step 4: Snowflake — CLEAN Layer**
+- Table: superstore_db.clean.orders_clean
+- TO_DATE() for date conversion
+- DATEDIFF() for shipping duration
+- CAST() for numbers (DECIMAL, INT)
+- CASE() for profit_status (Profitable / Loss / Break-even)
+
+**Step 5: Snowflake — REPORTING Layer**
+- Three tables created:
+  - regional_summary → region + category aggregates
+  - monthly_trend → time series + cumulative window function
+  - customer_analysis → RANK, ROW_NUMBER per customer
+
+**Step 6: Power BI Dashboard**
+- 4-page connected dashboard
+- Page 1: Overview
+- Page 2: Regional Performance
+- Page 3: Product Analysis
+- Page 4: Customer Insights
 
 ## 📁 File-by-File Explanation
 
