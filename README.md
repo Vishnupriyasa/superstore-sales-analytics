@@ -12,7 +12,6 @@ Built a 3-layer data warehouse (raw → clean → reporting) to process 10,000+ 
 - **Transformations**: SQL (CTEs, window functions, CASE statements)
 - **Visualization**: Power BI
   
-## 🏗️ Architecture
 
 ## 🏗️ Architecture
 
